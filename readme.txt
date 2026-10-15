@@ -1,1 +1,1 @@
-This is Tanmoy Shil.
+This is a django project. We are team QuadraTech. Our project is Find Your Roomie.
