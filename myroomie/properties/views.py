@@ -1,5 +1,4 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render
@@ -63,33 +62,3 @@ def room_create(request):
     }
 
     return render(request, 'properties/room_form.html', context)
-
-
-
-
-
-def room_detail(request, pk):
-    room = get_object_or_404(Room, pk=pk)
-
-    context = {
-        'room': room,
-    }
-
-    return render(
-        request,
-        'properties/room_detail.html',
-        context
-    )
-
-
-@login_required
-def my_rooms(request):
-    rooms = Room.objects.filter(
-        owner=request.user
-    ).order_by('-created_at')
-
-    return render(
-        request,
-        'properties/my_rooms.html',
-        {'rooms': rooms}
-    )

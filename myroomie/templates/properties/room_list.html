@@ -123,12 +123,6 @@
            class="add-room-btn">
             + Add Your Room
         </a>
-
-            <a href="{% url 'properties:my_rooms' %}"
-       class="add-room-btn">
-        My Rooms
-    </a>
-</div>
     </div>
 
     <!-- Search and Filter Section -->
@@ -212,12 +206,9 @@
                         Available from: {{ room.available_from }}
                     </p>
 
-
-                        <a href="{% url 'properties:room_detail' room.pk %}"
-                            class="details-btn">
-                             View Details
-                                </a>
-
+                    <a href="#" class="details-btn">
+                        View Details
+                    </a>
 
                 </div>
 
