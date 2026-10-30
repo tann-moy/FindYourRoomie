@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.shortcuts import render
@@ -62,3 +62,21 @@ def room_create(request):
     }
 
     return render(request, 'properties/room_form.html', context)
+
+
+
+
+
+def room_detail(request, pk):
+    room = get_object_or_404(Room, pk=pk)
+
+    context = {
+        'room': room,
+    }
+
+    return render(
+        request,
+        'properties/room_detail.html',
+        context
+    )
+

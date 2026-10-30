@@ -206,9 +206,12 @@
                         Available from: {{ room.available_from }}
                     </p>
 
-                    <a href="#" class="details-btn">
-                        View Details
-                    </a>
+
+                        <a href="{% url 'properties:room_detail' room.pk %}"
+                            class="details-btn">
+                             View Details
+                                </a>
+
 
                 </div>
 

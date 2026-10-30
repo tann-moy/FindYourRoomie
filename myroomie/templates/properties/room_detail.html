@@ -1,10 +1,250 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ room.title }} | RentMate</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 25px 15px;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #247a63;
+            text-decoration: none;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #263238;
+        }
+
+        .location {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .rent {
+            font-size: 26px;
+            font-weight: bold;
+            color: #247a63;
+        }
+
+        .section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .amenity {
+            background: #e8f4ef;
+            color: #247a63;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #247a63;
+            color: white;
+            padding: 11px 18px;
+            margin: 8px 8px 0 0;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background: #185c49;
+        }
+
+        .no-image {
+            padding: 60px 20px;
+            text-align: center;
+            background: #e8ecef;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .main-image {
+                height: 250px;
+            }
+
+            .content {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
+
 <body>
+
+<div class="container">
+
+    <a href="{% url 'properties:room_list' %}" class="back-link">
+        &larr; Back to All Rooms
+    </a>
+
+    <div class="detail-card">
+
+        <!-- Main Room Image -->
+        {% with room.images.all|first as photo %}
+            {% if photo %}
+                <img
+                    src="{{ photo.image.url }}"
+                    alt="{{ room.title }}"
+                    class="main-image"
+                >
+            {% else %}
+                <div class="no-image">
+                    <h3>No room image uploaded</h3>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+
+            <!-- Basic Information -->
+            <h1>{{ room.title }}</h1>
+
+            <p class="location">
+                &#128205; {{ room.location }}
+            </p>
+
+            <p class="rent">
+                ৳{{ room.rent }} / month
+            </p>
+
+            <p>
+                <strong>Room Type:</strong>
+                {{ room.get_room_type_display }}
+            </p>
+
+            <p>
+                <strong>Available From:</strong>
+                {{ room.available_from|default:"Not specified" }}
+            </p>
+
+            <!-- Description -->
+            <div class="section">
+                <h2>About This Room</h2>
+                <p>{{ room.description|default:"No description provided."|linebreaksbr }}</p>
+            </div>
+
+            <!-- Amenities -->
+            <div class="section">
+                <h2>Amenities</h2>
+
+                <div class="amenities">
+                    {% for amenity in room.amenities.all %}
+                        <span class="amenity">
+                            {{ amenity.name }}
+                        </span>
+                    {% empty %}
+                        <p>No amenities listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- All Room Images -->
+            <div class="section">
+                <h2>Room Gallery</h2>
+
+                <div class="gallery">
+                    {% for photo in room.images.all %}
+                        <img
+                            src="{{ photo.image.url }}"
+                            alt="{{ room.title }} photo"
+                        >
+                    {% empty %}
+                        <p>No additional images available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Owner Information -->
+            <div class="section">
+                <h2>Property Owner</h2>
+
+                <p>
+                    <strong>Name:</strong>
+                    {{ room.owner }}
+                </p>
+            </div>
+
+            <!-- Owner Actions -->
+            {% if user.is_authenticated and user == room.owner %}
+                <div class="section">
+                    <h2>Manage Your Room</h2>
+
+                    <a
+                        href="{% url 'properties:room_update' room.pk %}"
+                        class="button"
+                    >
+                        Edit Room
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>
