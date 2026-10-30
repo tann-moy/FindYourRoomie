@@ -24,4 +24,8 @@ app_name = 'properties'
 urlpatterns = [
     path('', views.room_list, name='room_list'),
     path('add/', views.room_create, name='room_create'),
+    path('room/<int:pk>/',views.room_detail,name='room_detail'),
+    path( 'my-rooms/',views.my_rooms,name='my_rooms'),
+    path('update/<int:pk>/', views.room_update, name='room_update'),
+
 ]
