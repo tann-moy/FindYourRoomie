@@ -1,6 +1,4 @@
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-
 
 # Create your views here.
 from django.shortcuts import render
@@ -64,27 +62,6 @@ def room_create(request):
     }
 
     return render(request, 'properties/room_form.html', context)
-
-
-
-
-def room_detail(request, pk):
-    room = get_object_or_404(Room, pk=pk)
-
-    context = {
-        'room': room,
-    }
-
-    return render(
-        request,
-        'properties/room_detail.html',
-        context
-    )
-
-from django.contrib.auth.decorators import login_required
-
-
-
 @login_required
 def my_rooms(request):
     rooms = Room.objects.filter(
@@ -115,4 +92,22 @@ def room_update(request, pk):
         request,
         'properties/room_form.html',
         {'form': form, 'room': room}
+    )
+
+def room_delete(request, pk):
+
+    room = get_object_or_404(
+        Room,
+        pk=pk,
+        owner=request.user
+    )
+
+    if request.method == 'POST':
+        room.delete()
+        return redirect('properties:room_list')
+
+    return render(
+        request,
+        'properties/room_conform_delete.html',
+        {'room': room}
     )
