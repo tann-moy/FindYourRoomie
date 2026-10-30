@@ -28,6 +28,8 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
 
     path("accounts/", include("accounts.urls")),
+
+    path("matching/", include("matching.urls")),
 ]
 
 if settings.DEBUG:
