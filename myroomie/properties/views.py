@@ -33,6 +33,7 @@ def room_list(request):
     return render(request, 'properties/room_list.html', context)
 
 
+
 @login_required
 def room_create(request):
 
@@ -61,6 +62,38 @@ def room_create(request):
 
     return render(request, 'properties/room_form.html', context)
 @login_required
+def my_rooms(request):
+    rooms = Room.objects.filter(
+        owner=request.user
+    ).order_by('-created_at')
+
+    return render(
+        request,
+        'properties/my_rooms.html',
+        {'rooms': rooms}
+    )
+
+
+@login_required
+def room_update(request, pk):
+    room = get_object_or_404(Room, pk=pk, owner=request.user)
+
+    if request.method == 'POST':
+        form = RoomForm(request.POST, instance=room)
+
+        if form.is_valid():
+            form.save()
+            return redirect('properties:room_list')
+    else:
+        form = RoomForm(instance=room)
+
+    return render(
+        request,
+        'properties/room_form.html',
+        {'form': form, 'room': room}
+    )
+
+
 def room_delete(request, pk):
 
     room = get_object_or_404(
@@ -79,33 +112,17 @@ def room_delete(request, pk):
         {'room': room}
     )
 
-@login_required
-def room_update(request, pk):
 
-    # Find the room belonging to the logged-in owner
-    room = get_object_or_404(
-        Room,
-        pk=pk,
-        owner=request.user
-    )
 
-    if request.method == 'POST':
-
-        form = RoomForm(request.POST, instance=room)
-
-        if form.is_valid():
-
-            form.save()
-
-            return redirect('properties:room_list')
-
-    else:
-
-        form = RoomForm(instance=room)
+def room_detail(request, pk):
+    room = get_object_or_404(Room, pk=pk)
 
     context = {
-        'form': form,
         'room': room,
     }
 
-    return render(request, 'properties/room_form.html', context)
+    return render(
+        request,
+        'properties/room_detail.html',
+        context
+    )
