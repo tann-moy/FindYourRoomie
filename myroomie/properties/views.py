@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.shortcuts import render
@@ -62,3 +62,55 @@ def room_create(request):
     }
 
     return render(request, 'properties/room_form.html', context)
+
+
+
+@login_required
+def room_update(request, pk):
+
+    # Find the room belonging to the logged-in owner
+    room = get_object_or_404(
+        Room,
+        pk=pk,
+        owner=request.user
+    )
+
+    if request.method == 'POST':
+
+        form = RoomForm(request.POST, instance=room)
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect('properties:room_list')
+
+    else:
+
+        form = RoomForm(instance=room)
+
+    context = {
+        'form': form,
+        'room': room,
+    }
+
+    return render(request, 'properties/room_form.html', context)
+
+
+@login_required
+def room_delete(request, pk):
+    room = get_object_or_404(
+        Room,
+        pk=pk,
+        owner=request.user
+    )
+
+    if request.method == 'POST':
+        room.delete()
+        return redirect('properties:room_list')
+
+    return render(
+        request,
+        'properties/room_confirm_delete.html',
+        {'room': room}
+    )

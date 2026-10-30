@@ -106,6 +106,26 @@
             margin-top: 10px;
         }
 
+        .edit-btn {
+            display: inline-block;
+            background: #2878c8;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .delete-btn {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
         .no-rooms {
             text-align: center;
             color: #777;
@@ -206,9 +226,25 @@
                         Available from: {{ room.available_from }}
                     </p>
 
+                    <!-- View Details -->
                     <a href="#" class="details-btn">
                         View Details
                     </a>
+
+                    <!-- Edit and Delete: Only Room Owner -->
+                    {% if user.is_authenticated and user == room.owner %}
+
+                        <a href="{% url 'properties:room_update' room.pk %}"
+                           class="edit-btn">
+                            Edit Room
+                        </a>
+
+                        <a href="{% url 'properties:room_delete' room.pk %}"
+                           class="delete-btn">
+                            Delete Room
+                        </a>
+
+                    {% endif %}
 
                 </div>
 
