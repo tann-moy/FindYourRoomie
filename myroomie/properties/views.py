@@ -61,6 +61,7 @@ def room_create(request):
     }
 
     return render(request, 'properties/room_form.html', context)
+
 @login_required
 def my_rooms(request):
     rooms = Room.objects.filter(
