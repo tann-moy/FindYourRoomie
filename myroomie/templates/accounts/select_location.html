@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Location</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        #map {
+            height: 450px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Select Your Location</h2>
+    <p>Click on the map to choose your location.</p>
+
+    <div id="map"></div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Latitude:</label>
+        <input type="text" id="latitude"
+               name="ref_latitude" readonly required>
+
+        <label>Longitude:</label>
+        <input type="text" id="longitude"
+               name="ref_longitude" readonly required>
+
+        <button type="submit">Save Location</button>
+    </form>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Initial map center: Dhaka
+        const map = L.map('map').setView([23.8103, 90.4125], 12);
+
+        L.tileLayer(
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
+
+        let marker;
+
+        map.on('click', function (event) {
+            const lat = event.latlng.lat;
+            const lng = event.latlng.lng;
+
+            if (marker) {
+                marker.setLatLng(event.latlng);
+            } else {
+                marker = L.marker(event.latlng, {
+                    draggable: true
+                }).addTo(map);
+            }
+
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            marker.on('dragend', function () {
+                const position = marker.getLatLng();
+
+                document.getElementById('latitude').value =
+                    position.lat;
+
+                document.getElementById('longitude').value =
+                    position.lng;
+            });
+        });
+    </script>
+</body>
+</html>

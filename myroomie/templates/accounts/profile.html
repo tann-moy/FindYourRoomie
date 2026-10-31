@@ -1,0 +1,403 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Profile | RentMate{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<style>
+    #location-map {
+        width: 100%;
+        height: 400px;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        z-index: 1;
+    }
+
+    .page-card {
+        border-radius: 16px;
+    }
+
+    .coordinate-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        overflow-wrap: anywhere;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="page-card p-4 p-md-5">
+
+            <h2 class="fw-bold mb-2">My Profile</h2>
+
+            <p class="text-secondary mb-4">
+                Update your personal information and choose your location on the map.
+            </p>
+
+            {% if profile.profile_picture %}
+                <div class="mb-4 text-center">
+                    <img
+                        src="{{ profile.profile_picture.url }}"
+                        alt="Profile picture"
+                        width="120"
+                        height="120"
+                        class="rounded-circle object-fit-cover"
+                    >
+                </div>
+            {% endif %}
+
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                <!-- Profile fields -->
+                {% for field in form %}
+                    <div class="mb-3">
+
+                        <label
+                            for="{{ field.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                {% endfor %}
+
+
+                <!-- Map section -->
+                <hr class="my-4">
+
+                <h4 class="fw-bold mb-2">
+                    <i class="bi bi-geo-alt"></i>
+                    Choose Your Location
+                </h4>
+
+                <p class="text-secondary">
+                    Click on the map to select your home, university,
+                    office, or preferred location.
+                </p>
+
+
+<div class="mb-3">
+    <label for="location-search" class="form-label fw-semibold">
+        <i class="bi bi-search"></i> Search Location
+    </label>
+
+    <div class="input-group">
+        <input
+            type="text"
+            id="location-search"
+            class="form-control"
+            placeholder="Search university, area or address..."
+        >
+
+        <button
+            type="button"
+            id="search-location-btn"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+
+    <small class="text-secondary">
+        Search for a place, then click the map to fine-tune your location.
+    </small>
+
+    <div id="search-message" class="small mt-2" role="status"></div>
+</div>
+
+<div id="location-map" class="mb-3"></div>
+
+
+                <div class="coordinate-box mb-4">
+                    <div class="fw-semibold mb-2">
+                        Selected Coordinates
+                    </div>
+
+                    <div id="selected-coordinates" class="text-secondary small">
+                        Click on the map to select your location.
+                    </div>
+                </div>
+
+
+                <button type="submit" class="btn btn-primary">
+                    Save Profile
+                </button>
+
+                <a
+                    href="{% url 'dashboard' %}"
+                    class="btn btn-outline-secondary ms-2"
+                >
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get Django form fields
+    const latInput = document.getElementById("id_ref_latitude");
+    const lngInput = document.getElementById("id_ref_longitude");
+    const coordsDisplay = document.getElementById("selected-coordinates");
+
+    const searchInput = document.getElementById("location-search");
+    const searchButton = document.getElementById("search-location-btn");
+    const searchMessage = document.getElementById("search-message");
+
+    if (!latInput || !lngInput) {
+        console.error(
+            "Latitude/longitude fields not found. Check accounts/forms.py."
+        );
+        return;
+    }
+
+    if (!document.getElementById("location-map")) {
+        console.error("Map container #location-map was not found.");
+        return;
+    }
+
+    // Default location: Dhaka, Bangladesh
+    const defaultLat = 23.8103;
+    const defaultLng = 90.4125;
+
+    // Read previously saved coordinates
+    const savedLat = parseFloat(latInput.value);
+    const savedLng = parseFloat(lngInput.value);
+
+    const hasSavedLocation =
+        latInput.value.trim() !== "" &&
+        lngInput.value.trim() !== "" &&
+        Number.isFinite(savedLat) &&
+        Number.isFinite(savedLng) &&
+        savedLat >= -90 && savedLat <= 90 &&
+        savedLng >= -180 && savedLng <= 180;
+
+    const startLat = hasSavedLocation ? savedLat : defaultLat;
+    const startLng = hasSavedLocation ? savedLng : defaultLng;
+    const startZoom = hasSavedLocation ? 16 : 13;
+
+    // Create map
+    const map = L.map("location-map").setView(
+        [startLat, startLng],
+        startZoom
+    );
+
+    // Free OpenStreetMap HOT tiles
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        {
+            subdomains: "abc",
+            maxZoom: 19,
+            attribution:
+                '&copy; OpenStreetMap contributors, Tiles style by HOT'
+        }
+    ).addTo(map);
+
+    let marker = null;
+
+    // Select a location and update form coordinates
+    function selectLocation(lat, lng, popupText = null) {
+
+        const latitude = Number(lat.toFixed(6));
+        const longitude = Number(lng.toFixed(6));
+
+        latInput.value = latitude;
+        lngInput.value = longitude;
+
+        if (coordsDisplay) {
+            coordsDisplay.textContent =
+                "Latitude: " + latitude +
+                " | Longitude: " + longitude;
+        }
+
+        if (!marker) {
+            marker = L.marker([latitude, longitude]).addTo(map);
+        } else {
+            marker.setLatLng([latitude, longitude]);
+        }
+
+        marker.bindPopup(
+            popupText ||
+            "Selected location<br>" +
+            "Latitude: " + latitude + "<br>" +
+            "Longitude: " + longitude
+        );
+    }
+
+    // Display previously saved coordinates
+    if (hasSavedLocation) {
+        selectLocation(savedLat, savedLng);
+    }
+
+    // Click anywhere on the map to select a location
+    map.on("click", function (event) {
+        selectLocation(
+            event.latlng.lat,
+            event.latlng.lng
+        );
+    });
+
+    // Update map if coordinates are manually edited
+    function updateMapFromInputs() {
+        const lat = parseFloat(latInput.value);
+        const lng = parseFloat(lngInput.value);
+
+        if (
+            latInput.value.trim() !== "" &&
+            lngInput.value.trim() !== "" &&
+            Number.isFinite(lat) &&
+            Number.isFinite(lng) &&
+            lat >= -90 && lat <= 90 &&
+            lng >= -180 && lng <= 180
+        ) {
+            selectLocation(lat, lng);
+            map.setView([lat, lng], 16);
+        }
+    }
+
+    latInput.addEventListener("change", updateMapFromInputs);
+    lngInput.addEventListener("change", updateMapFromInputs);
+
+    // Search a place by name using Nominatim
+    async function searchLocation() {
+
+        if (!searchInput || !searchButton || !searchMessage) {
+            console.error("Location search HTML elements were not found.");
+            return;
+        }
+
+        const query = searchInput.value.trim();
+
+        if (!query) {
+            searchMessage.textContent = "Please enter a location name.";
+            searchMessage.className = "small mt-2 text-danger";
+            return;
+        }
+
+        searchButton.disabled = true;
+        searchMessage.textContent = "Searching...";
+        searchMessage.className = "small mt-2 text-secondary";
+
+        try {
+            const url = new URL(
+                "https://nominatim.openstreetmap.org/search"
+            );
+
+            url.searchParams.set("q", query);
+            url.searchParams.set("format", "jsonv2");
+            url.searchParams.set("limit", "1");
+            url.searchParams.set("countrycodes", "bd");
+
+            const response = await fetch(url.toString());
+
+            if (!response.ok) {
+                throw new Error(
+                    "Location service returned status " + response.status
+                );
+            }
+
+            const results = await response.json();
+
+            if (results.length === 0) {
+                searchMessage.textContent =
+                    "Location not found. Try another place name.";
+
+                searchMessage.className = "small mt-2 text-danger";
+                return;
+            }
+
+            const place = results[0];
+            const lat = Number(place.lat);
+            const lng = Number(place.lon);
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                throw new Error("Invalid coordinates returned.");
+            }
+
+            // Move map to the search result
+            map.setView([lat, lng], 16);
+
+            // Update marker and coordinate fields
+            selectLocation(lat, lng, place.display_name);
+
+            marker.openPopup();
+
+            searchMessage.textContent =
+                "Found: " + place.display_name;
+
+            searchMessage.className = "small mt-2 text-success";
+
+        } catch (error) {
+            console.error("Location search error:", error);
+
+            searchMessage.textContent =
+                "Search failed. Check your internet connection and try again.";
+
+            searchMessage.className = "small mt-2 text-danger";
+
+        } finally {
+            searchButton.disabled = false;
+        }
+    }
+
+    // Search button
+    if (searchButton) {
+        searchButton.addEventListener("click", searchLocation);
+    }
+
+    // Press Enter to search
+    if (searchInput) {
+        searchInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                searchLocation();
+            }
+        });
+    }
+
+    // Fix map sizing in Bootstrap layout
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 300);
+
+});
+</script>
+
+
+{% endblock %}

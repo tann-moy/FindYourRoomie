@@ -1,0 +1,77 @@
+
+{% extends "base.html" %}
+
+{% block title %}Home | RentMate{% endblock %}
+
+{% block content %}
+
+<section class="row align-items-center py-5">
+
+    <div class="col-lg-7 mb-4 mb-lg-0">
+
+        <span class="badge text-bg-primary mb-3">
+            Smart Rental Platform
+        </span>
+
+        <h1 class="display-4 fw-bold">
+            Find Your Perfect Room & Roommate
+        </h1>
+
+        <p class="lead text-secondary mt-3">
+            Discover suitable rooms, compare rental budgets,
+            and connect with compatible roommates using RentMate.
+        </p>
+
+        {% if user.is_authenticated %}
+
+            <a href="{% url 'dashboard' %}"
+               class="btn btn-primary btn-lg mt-3">
+                My Dashboard
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'register' %}"
+               class="btn btn-primary btn-lg mt-3">
+                Get Started
+            </a>
+
+            <a href="{% url 'login' %}"
+               class="btn btn-outline-primary btn-lg mt-3 ms-2">
+                Login
+            </a>
+
+        {% endif %}
+
+    </div>
+
+    <div class="col-lg-5">
+        <div class="page-card p-4 p-md-5">
+            <h3 class="fw-bold">Why RentMate?</h3>
+
+            <div class="mt-4">
+                <h5>🏠 Find Rooms</h5>
+                <p class="text-secondary">
+                    Explore available rental properties.
+                </p>
+            </div>
+
+            <div class="mt-3">
+                <h5>📍 Nearby Locations</h5>
+                <p class="text-secondary">
+                    Discover rooms near your preferred destination.
+                </p>
+            </div>
+
+            <div class="mt-3">
+                <h5>🤝 Roommate Matching</h5>
+                <p class="text-secondary">
+                    Compare lifestyle and budget preferences.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
