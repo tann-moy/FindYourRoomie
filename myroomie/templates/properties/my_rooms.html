@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Rooms | RentMate</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .navbar {
+            background: #253b80;
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 16px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 8px;
+        }
+
+        .add-btn, .details-btn, .edit-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background: #253b80;
+            color: white;
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(260px, 1fr)
+            );
+            gap: 22px;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px #00000012;
+        }
+
+        .room-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e3e7ef;
+            display: block;
+        }
+
+        .no-image {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e3e7ef;
+            color: #555;
+        }
+
+        .room-content {
+            padding: 18px;
+        }
+
+        .room-content h3 {
+            margin: 0 0 10px;
+        }
+
+        .location {
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .rent {
+            font-size: 20px;
+            font-weight: bold;
+            color: #253b80;
+            margin-bottom: 15px;
+        }
+
+        .details-btn {
+            background: #253b80;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #e8edff;
+            color: #253b80;
+            margin-left: 5px;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 16px 5%;
+            }
+
+            .navbar a {
+                margin-left: 0;
+                margin-right: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h2>RentMate</h2>
+
+        <div>
+            <a href="{% url 'properties:room_list' %}">
+                Home
+            </a>
+            <a href="{% url 'properties:my_rooms' %}">
+                My Rooms
+            </a>
+            <a href="{% url 'properties:room_create' %}">
+                Add Room
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <div class="page-heading">
+            <div>
+                <h1>My Rooms</h1>
+                <p>Manage the rooms you have listed on RentMate.</p>
+            </div>
+
+            <a class="add-btn"
+               href="{% url 'properties:room_create' %}">
+                + Add New Room
+            </a>
+              <a href="{% url 'properties:my_rooms' %}"
+                 class="add-room-btn">
+                    My Rooms
+              </a>
+        </div>
+
+        {% if rooms %}
+            <div class="room-grid">
+
+                {% for room in rooms %}
+                    <article class="room-card">
+
+                        {% with room.images.all|first as photo %}
+                            {% if photo %}
+                                <img
+                                    class="room-image"
+                                    src="{{ photo.image.url }}"
+                                    alt="{{ room.title }}"
+                                >
+                            {% else %}
+                                <div class="no-image">
+                                    No image available
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="room-content">
+                            <h3>{{ room.title }}</h3>
+
+                            <p class="location">
+                                {{ room.location }}
+                            </p>
+
+                            <p class="rent">
+                                ৳{{ room.rent }} / month
+                            </p>
+
+                            <p>
+                                Room type:
+                                {{ room.get_room_type_display }}
+                            </p>
+
+                            <p>
+                                Available from:
+                                {{ room.available_from|date:"d M Y" }}
+                            </p>
+
+                            <a
+                                class="details-btn"
+                                href="{% url 'properties:room_detail' room.pk %}">
+                                View Details
+                            </a>
+
+                            <a
+                                class="edit-btn"
+                                href="{% url 'properties:room_update' room.pk %}">
+                                Edit
+                            </a>
+                        </div>
+
+                    </article>
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+            <div class="empty-state">
+                <h2>You haven't listed any rooms yet.</h2>
+                <p>Your rooms will appear here after you add them.</p>
+
+                <a class="add-btn"
+                   href="{% url 'properties:room_create' %}">
+                    Add Your First Room
+                </a>
+            </div>
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Room | RentMate</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #247a63;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .errorlist {
+            color: red;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: #247a63;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #195b49;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #247a63;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Add Your Room</h1>
+
+    <p style="text-align:center; color:#777;">
+        Enter your room information below.
+    </p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+            <div class="form-group">
+
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p style="color:red;">{{ error }}</p>
+                {% endfor %}
+
+            </div>
+
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            <div class="errorlist">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="submit-btn">
+            Submit Room
+        </button>
+
+    </form>
+
+    <a href="{% url 'properties:room_list' %}"
+       class="back-link">
+        Back to Properties
+    </a>
+
+</div>
+
+</body>
+</html>
