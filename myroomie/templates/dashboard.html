@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard | RentMate{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="fw-bold">Welcome, {{ user.username }}!</h2>
+
+    <p class="text-secondary">
+        Manage your profile and find your ideal living space.
+    </p>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-md-6 col-lg-4">
+        <div class="page-card p-4 h-100">
+            <h4>My Profile</h4>
+            <p class="text-secondary">
+                Update your personal information.
+            </p>
+            <a href="{% url 'profile' %}"
+               class="btn btn-primary">
+                Edit Profile
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="page-card p-4 h-100">
+            <h4>My Preferences</h4>
+            <p class="text-secondary">
+                Set your budget, lifestyle and room preferences.
+            </p>
+            <a href="{% url 'preferences' %}"
+               class="btn btn-primary">
+                Set Preferences
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="page-card p-4 h-100">
+            <h4>Account Role</h4>
+            <p class="text-secondary">
+                Your current role:
+                <strong>{{ user.get_role_display }}</strong>
+            </p>
+            <p class="text-secondary small">
+                Use your role to identify whether you are an Owner
+                or Tenant.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
