@@ -28,9 +28,9 @@ from django.contrib.auth import views as auth_views
 from .import settings
 
 urlpatterns = [
-<<<<<<< HEAD
+
     path('admin/', admin.site.urls),
-    path('', include('properties.urls')),
+    path('', include('accounts.urls')),
     path(
         'accounts/login/',
         auth_views.LoginView.as_view(
@@ -44,14 +44,8 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),
         name='logout'
     ),
-]
 
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
-=======
+
     path("admin/", admin.site.urls),
 
     path("", views.home, name="home"),
@@ -60,8 +54,11 @@ if settings.DEBUG:
     path("accounts/", include("accounts.urls")),
 
     path("matching/", include("matching.urls")),
+    path("properties/", include("properties.urls")),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
->>>>>>> 1f925ed6a5b7236b4524afcb0f60bc98f66ea9bb
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
